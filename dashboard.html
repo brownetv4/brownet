@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NULLFRAME // DASHBOARD</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --obsidian: #0a0a0b;
+            --charcoal: #161618;
+            --gold: #d4af37;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --font-main: 'Inter', -apple-system, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--obsidian);
+            color: #ffffff;
+            font-family: var(--font-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        nav {
+            width: 280px;
+            background: var(--charcoal);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--gold);
+            margin-bottom: 40px;
+            padding-left: 10px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .nav-links {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* Custom Scrollbar for 15+ buttons */
+        .nav-links::-webkit-scrollbar { width: 4px; }
+        .nav-links::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .nav-btn {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #a0a0a0;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-btn i { margin-right: 12px; font-size: 1rem; width: 20px; text-align: center; }
+
+        .nav-btn:hover {
+            background: rgba(212, 175, 55, 0.05);
+            border-color: var(--gold);
+            color: #fff;
+            box-shadow: 0 0 15px var(--gold-glow);
+            transform: translateX(5px);
+        }
+
+        .nav-btn.active {
+            background: var(--gold);
+            color: var(--obsidian);
+            font-weight: 700;
+            border-color: var(--gold);
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+
+        /* Main Viewport Area */
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: radial-gradient(circle at top right, #1a1a1c, #0a0a0b);
+        }
+
+        .top-bar {
+            height: 70px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: rgba(10, 10, 11, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .path-trace {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            color: #666;
+        }
+
+        .path-trace span { color: var(--gold); }
+
+        .viewport {
+            flex-grow: 1;
+            padding: 25px;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #000;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Premium Loading Overlay */
+        .loading-mask {
+            position: absolute;
+            inset: 25px;
+            background: var(--obsidian);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .loader-text {
+            color: var(--gold);
+            letter-spacing: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="brand">NullFrame Studioz</div>
+        <div class="nav-links" id="navLinks">
+            </div>
+    </nav>
+
+    <main>
+        <header class="top-bar">
+            <div class="path-trace">Directory: <span id="currentPath">/SYSTEM/STATS</span></div>
+            <div style="font-size: 12px; color: #444;">V.06_BETA</div>
+        </header>
+
+        <div class="viewport">
+            <div class="loading-mask" id="loader">
+                <div class="loader-text">Initializing Secure Link...</div>
+            </div>
+            <iframe id="gameFrame" src="/stats" frameborder="0"></iframe>
+        </div>
+    </main>
+
+    <script>
+        /**
+         * 1. CONDITIONAL AD INJECTION
+         * Checks if 'premium.enabled?' is NOT set to 'true'
+         */
+        const isPremium = localStorage.getItem('premium.enabled?') === 'true';
+
+        if (!isPremium) {
+            const adScript = document.createElement('script');
+            adScript.src = '/adselector.js';
+            adScript.async = true;
+            document.head.appendChild(adScript);
+            console.log("Log: Ad-Selector injected (Non-Premium User).");
+        } else {
+            console.log("Log: Premium active. Ad-Selector suppressed.");
+        }
+
+        /**
+         * 2. INTERFACE CONFIGURATION
+         */
+        const routes = [
+            { name: 'Stats', path: '/stats', icon: 'fa-chart-line' },
+            { name: 'Brons', path: '/brons', icon: 'fa-coins' },
+            { name: 'Market', path: '/market', icon: 'fa-cart-shopping' },
+            { name: 'Garage', path: '/garage', icon: 'fa-car-side' },
+            { name: 'Workshop', path: '/tuning', icon: 'fa-screwdriver-wrench' },
+            { name: 'Quests', path: '/missions', icon: 'fa-crosshairs' },
+            { name: 'Lobby', path: '/racing', icon: 'fa-trophy' },
+            { name: 'Social', path: '/social', icon: 'fa-comment-dots' },
+            { name: 'Storage', path: '/inv', icon: 'fa-box-archive' },
+            { name: 'The Vault', path: '/vault', icon: 'fa-lock' },
+            { name: 'Patch Notes', path: '/news', icon: 'fa-rss' },
+            { name: 'Config', path: '/settings', icon: 'fa-sliders' },
+            { name: 'ID Card', path: '/profile', icon: 'fa-id-card' },
+            { name: 'Rankings', path: '/top', icon: 'fa-medal' },
+            { name: 'Terminal', path: '/db', icon: 'fa-terminal' }
+        ];
+
+        const navContainer = document.getElementById('navLinks');
+        const frame = document.getElementById('gameFrame');
+        const pathDisplay = document.getElementById('currentPath');
+        const loader = document.getElementById('loader');
+
+        // 3. GENERATE BUTTONS
+        routes.forEach((route, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'nav-btn';
+            if (index === 0) btn.classList.add('active'); // Default selection
+            
+            btn.innerHTML = `<i class="fas ${route.icon}"></i> ${route.name}`;
+            
+            btn.onclick = () => {
+                // Update active state
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Load route
+                loadPage(route.path);
+            };
+
+            navContainer.appendChild(btn);
+        });
+
+        // 4. NAVIGATION LOGIC
+        function loadPage(path) {
+            // Show premium-style loader
+            loader.style.display = 'flex';
+            pathDisplay.innerText = `/SYSTEM${path}`;
+            
+            // Short timeout to allow for smooth transitions
+            setTimeout(() => {
+                frame.src = path;
+                frame.onload = () => {
+                    loader.style.display = 'none';
+                };
+            }, 400);
+        }
+    </script>
+</body>
+</html>
